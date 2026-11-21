@@ -153,8 +153,9 @@
   #scratchCanvas { position: absolute; inset: 0; width: 100%; height: 100%; touch-action: none; cursor: grab; border-radius: 16px; transition: opacity .5s; }
   #snackForm.locked { opacity: .25; pointer-events: none; filter: blur(1px); transition: opacity .5s, filter .5s; }
   #snackForm { transition: opacity .5s, filter .5s; }
-  .finder { font-size: 13px; color: var(--muted); margin-top: 14px; display: none; }
-  .finder b { color: var(--ink); }
+  .finder { font-size: 20px; line-height: 1.4; color: var(--muted); margin-top: 22px; display: none; }
+  .finder b { font-size: 26px; }
+  .finder b { color: var(--ink); font-weight: 700; }
 </style>
 </head>
 <body>
@@ -452,7 +453,7 @@
 
   // ---------- #7 echo the snack, #3 finder number ----------
   const COUNTER = "https://abacus.jasoncameron.dev/hit/samanmontaseri.com/snack-finders";
-  const COUNTER_OFFSET = 0; // raise this to subtract your own test submissions
+  const COUNTER_OFFSET = 1; // raise this to subtract your own test submissions
 
   function ordinal(n) {
     const s = ["th", "st", "nd", "rd"], v = n % 100;
