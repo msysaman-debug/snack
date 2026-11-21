@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>You found it.</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+    background: #fff;
+    color: #111;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 32px 20px;
+  }
+  main { width: 100%; max-width: 440px; }
+  .eyebrow {
+    font-size: 11px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: #888;
+    margin-bottom: 14px;
+  }
+  h1 { font-size: 34px; font-weight: 700; line-height: 1.15; margin-bottom: 12px; }
+  .lede { font-size: 16px; line-height: 1.55; color: #444; margin-bottom: 32px; }
+  label { display: block; font-size: 13px; font-weight: 600; margin-bottom: 6px; }
+  .hint { font-weight: 400; color: #999; }
+  input[type="text"] {
+    width: 100%;
+    font: inherit;
+    font-size: 16px;
+    padding: 12px 14px;
+    border: 1px solid #ddd;
+    border-radius: 10px;
+    background: #fafafa;
+    margin-bottom: 20px;
+    transition: border-color .15s, background .15s;
+  }
+  input[type="text"]:focus { outline: none; border-color: #111; background: #fff; }
+  button {
+    width: 100%;
+    font: inherit;
+    font-size: 15px;
+    font-weight: 600;
+    padding: 14px;
+    border: none;
+    border-radius: 10px;
+    background: #111;
+    color: #fff;
+    cursor: pointer;
+    margin-top: 4px;
+  }
+  button:disabled { background: #999; cursor: default; }
+  .honey { display: none; }
+  .error { color: #b00020; font-size: 14px; margin-top: 14px; display: none; }
+  .done { display: none; }
+  .done h1 { margin-bottom: 12px; }
+  .footer { font-size: 12px; color: #aaa; margin-top: 36px; }
+</style>
+</head>
+<body>
+<main>
+  <section id="formView">
+    <p class="eyebrow">Secret page · You actually read the syllabus</p>
+    <h1>Okay, you read to the end.</h1>
+    <p class="lede">That deserves a reward. Tell me your favorite snack and I'll bring it to section.</p>
+
+    <form id="snackForm">
+      <label for="name">Your name</label>
+      <input type="text" id="name" name="name" required autocomplete="name">
+
+      <label for="snack">Favorite snack</label>
+      <input type="text" id="snack" name="snack" required placeholder="Be specific — brand and flavor help">
+
+      <label for="avoid">Anything you can't eat? <span class="hint">(optional)</span></label>
+      <input type="text" id="avoid" name="allergies_or_restrictions" placeholder="Allergies, dietary restrictions">
+
+      <input type="text" name="_honey" class="honey" tabindex="-1" autocomplete="off">
+
+      <button type="submit" id="submitBtn">Send it</button>
+      <p class="error" id="errorMsg">Something went wrong. Try again, or just email me.</p>
+    </form>
+  </section>
+
+  <section id="doneView" class="done">
+    <p class="eyebrow">Received</p>
+    <h1>Got it. 🍪</h1>
+    <p class="lede">Your snack is on its way, give or take a week. Don't tell the others.</p>
+  </section>
+
+  <p class="footer">— Saman</p>
+</main>
+
+<script>
+  // Replace with your email (or the FormSubmit alias they send you after activation).
+  const ENDPOINT = "https://formsubmit.co/ajax/montaseri@ucla.edu";
+
+  const form = document.getElementById("snackForm");
+  const btn = document.getElementById("submitBtn");
+  const err = document.getElementById("errorMsg");
+
+  form.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    err.style.display = "none";
+    btn.disabled = true;
+    btn.textContent = "Sending…";
+
+    const data = Object.fromEntries(new FormData(form).entries());
+    data._subject = "Syllabus snack: " + (data.name || "a student");
+    data._template = "table";
+    data._captcha = "false";
+
+    try {
+      const res = await fetch(ENDPOINT, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "Accept": "application/json" },
+        body: JSON.stringify(data)
+      });
+      if (!res.ok) throw new Error("bad response");
+      document.getElementById("formView").style.display = "none";
+      document.getElementById("doneView").style.display = "block";
+    } catch (_) {
+      err.style.display = "block";
+      btn.disabled = false;
+      btn.textContent = "Send it";
+    }
+  });
+</script>
+</body>
+</html>
