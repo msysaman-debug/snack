@@ -4,106 +4,304 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>You found it.</title>
+<meta name="description" content="A secret page for people who read the whole syllabus.">
+<meta property="og:title" content="You found the secret page.">
+<meta property="og:description" content="Read to the end of the syllabus? Claim your snack.">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🍪</text></svg>">
 <style>
+  :root {
+    --bg: #ffffff;
+    --ink: #111111;
+    --muted: #6b6b6b;
+    --faint: #a3a3a3;
+    --line: #e4e4e4;
+    --field: #f6f6f6;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #111111;
+      --ink: #f2f2f2;
+      --muted: #a8a8a8;
+      --faint: #6f6f6f;
+      --line: #2c2c2c;
+      --field: #1b1b1b;
+    }
+  }
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body {
     font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
-    background: #fff;
-    color: #111;
+    background: var(--bg);
+    color: var(--ink);
     min-height: 100vh;
     display: flex;
     align-items: center;
     justify-content: center;
-    padding: 32px 20px;
+    padding: 48px 22px;
+    -webkit-font-smoothing: antialiased;
   }
-  main { width: 100%; max-width: 440px; }
+  main { width: 100%; max-width: 460px; }
+
+
   .eyebrow {
     font-size: 11px;
-    letter-spacing: 0.18em;
+    letter-spacing: 0.2em;
     text-transform: uppercase;
-    color: #888;
+    color: var(--faint);
     margin-bottom: 14px;
   }
-  h1 { font-size: 34px; font-weight: 700; line-height: 1.15; margin-bottom: 12px; }
-  .lede { font-size: 16px; line-height: 1.55; color: #444; margin-bottom: 32px; }
-  label { display: block; font-size: 13px; font-weight: 600; margin-bottom: 6px; }
-  .hint { font-weight: 400; color: #999; }
+  h1 {
+    font-size: clamp(30px, 7vw, 38px);
+    font-weight: 700;
+    line-height: 1.1;
+    letter-spacing: -0.02em;
+    margin-bottom: 14px;
+  }
+  .lede { font-size: 16px; line-height: 1.6; color: var(--muted); margin-bottom: 34px; }
+
+  .field { margin-bottom: 22px; }
+  label { display: block; font-size: 13px; font-weight: 600; margin-bottom: 7px; }
+  .hint { font-weight: 400; color: var(--faint); }
   input[type="text"] {
     width: 100%;
     font: inherit;
     font-size: 16px;
-    padding: 12px 14px;
-    border: 1px solid #ddd;
-    border-radius: 10px;
-    background: #fafafa;
-    margin-bottom: 20px;
+    color: var(--ink);
+    padding: 13px 15px;
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    background: var(--field);
     transition: border-color .15s, background .15s;
   }
-  input[type="text"]:focus { outline: none; border-color: #111; background: #fff; }
-  button {
+  input[type="text"]::placeholder { color: var(--faint); }
+  input[type="text"]:focus { outline: none; border-color: var(--ink); background: var(--bg); }
+
+  .chips { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
+  .chip {
+    font: inherit;
+    font-size: 13px;
+    color: var(--muted);
+    background: transparent;
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    padding: 6px 12px;
+    cursor: pointer;
+    transition: border-color .15s, color .15s;
+  }
+  .chip:hover, .chip:focus-visible { border-color: var(--ink); color: var(--ink); outline: none; }
+
+  button[type="submit"] {
     width: 100%;
     font: inherit;
     font-size: 15px;
     font-weight: 600;
-    padding: 14px;
+    padding: 15px;
     border: none;
-    border-radius: 10px;
-    background: #111;
-    color: #fff;
+    border-radius: 12px;
+    background: var(--ink);
+    color: var(--bg);
     cursor: pointer;
-    margin-top: 4px;
+    margin-top: 6px;
+    transition: transform .1s, opacity .15s;
   }
-  button:disabled { background: #999; cursor: default; }
+  button[type="submit"]:active { transform: scale(0.98); }
+  button[type="submit"]:disabled { opacity: .5; cursor: default; }
   .honey { display: none; }
-  .error { color: #b00020; font-size: 14px; margin-top: 14px; display: none; }
-  .done { display: none; }
-  .done h1 { margin-bottom: 12px; }
-  .footer { font-size: 12px; color: #aaa; margin-top: 36px; }
+  .error { color: #c0392b; font-size: 14px; margin-top: 14px; display: none; }
+
+  .done { display: none; text-align: center; }
+  .done .big { font-size: 64px; margin-bottom: 18px; display: inline-block; animation: pop .5s cubic-bezier(.2,1.6,.4,1); }
+  .done .lede { margin-bottom: 0; }
+  @keyframes pop { from { transform: scale(0) rotate(-30deg); } to { transform: scale(1) rotate(0); } }
+  .fade { animation: fade .4s ease both; }
+  @keyframes fade { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+
+  .footer {
+    font-size: 12px;
+    color: var(--faint);
+    margin-top: 40px;
+    display: flex;
+    justify-content: space-between;
+  }
+  .footer a { color: inherit; }
+  .gif { width: 100%; margin: 0 0 28px; border-radius: 14px; overflow: hidden; min-height: 120px; }
+  .gif iframe { border-radius: 14px; }
+  #confetti { position: fixed; inset: 0; pointer-events: none; z-index: 10; }
 </style>
 </head>
 <body>
+<canvas id="confetti"></canvas>
 <main>
-  <section id="formView">
-    <p class="eyebrow">Secret page · You actually read the syllabus</p>
-    <h1>Okay, you read to the end.</h1>
-    <p class="lede">That deserves a reward. Tell me your favorite snack and I'll bring it to section.</p>
+
+  <section id="formView" class="fade">
+    <div class="gif">
+      <div class="tenor-gif-embed" data-postid="3826864211589235688" data-share-method="host" data-aspect-ratio="1.79137" data-width="100%"><a href="https://tenor.com/view/applause-clapping-clapping-meme-audience-clapping-gif-3826864211589235688">Applause Clapping GIF</a> from <a href="https://tenor.com/search/applause-gifs">Applause GIFs</a></div>
+    </div>
+    <p class="eyebrow">Secret page · You read the whole syllabus</p>
+    <h1>Okay, you actually read to the end.</h1>
+    <p class="lede">Almost nobody does. Tell me your favorite snack and I'll bring it to section.</p>
 
     <form id="snackForm">
-      <label for="name">Your name</label>
-      <input type="text" id="name" name="name" required autocomplete="name">
+      <div class="field">
+        <label for="name">Your name</label>
+        <input type="text" id="name" name="name" required autocomplete="name">
+      </div>
 
-      <label for="snack">Favorite snack</label>
-      <input type="text" id="snack" name="snack" required placeholder="Be specific — brand and flavor help">
+      <div class="field">
+        <label for="snack">Favorite snack</label>
+        <input type="text" id="snack" name="snack" required placeholder="Brand and flavor help">
+        <div class="chips" aria-label="Quick picks">
+          <button type="button" class="chip">Protein bar</button>
+          <button type="button" class="chip">Cashews</button>
+          <button type="button" class="chip">Pistachios</button>
+          <button type="button" class="chip">Trader Joe's anything</button>
+        </div>
+      </div>
 
-      <label for="avoid">Anything you can't eat? <span class="hint">(optional)</span></label>
-      <input type="text" id="avoid" name="allergies_or_restrictions" placeholder="Allergies, dietary restrictions">
+      <div class="field">
+        <label for="avoid">Anything you can't eat? <span class="hint">(optional)</span></label>
+        <input type="text" id="avoid" name="allergies_or_restrictions" placeholder="Allergies, dietary restrictions">
+      </div>
 
       <input type="text" name="_honey" class="honey" tabindex="-1" autocomplete="off">
 
       <button type="submit" id="submitBtn">Send it</button>
-      <p class="error" id="errorMsg">Something went wrong. Try again, or just email me.</p>
+      <p class="error" id="errorMsg" role="alert">Something went wrong. Try again, or just email me.</p>
     </form>
   </section>
 
-  <section id="doneView" class="done">
+  <section id="doneView" class="done" aria-live="polite">
+    <span class="big">🍪</span>
     <p class="eyebrow">Received</p>
-    <h1>Got it. 🍪</h1>
+    <h1>Got it.</h1>
     <p class="lede">Your snack is on its way, give or take a week. Don't tell the others.</p>
   </section>
 
-  <p class="footer">— Saman</p>
+  <p class="footer"><span>— Saman</span><a href="https://samanmontaseri.com">samanmontaseri.com</a></p>
 </main>
 
 <script>
-  // Replace with your email (or the FormSubmit alias they send you after activation).
+  // Replace with your FormSubmit alias after activation to hide your email.
   const ENDPOINT = "https://formsubmit.co/ajax/montaseri@ucla.edu";
 
   const form = document.getElementById("snackForm");
   const btn = document.getElementById("submitBtn");
   const err = document.getElementById("errorMsg");
+  const snackInput = document.getElementById("snack");
+
+  document.querySelectorAll(".chip").forEach(chip => {
+    chip.addEventListener("click", () => {
+      snackInput.value = chip.textContent;
+      snackInput.focus();
+    });
+  });
+
+
+  // ---------- celebration: confetti + sound ----------
+  let audioCtx;
+  function getAudio() {
+    try { audioCtx = audioCtx || new (window.AudioContext || window.webkitAudioContext)(); } catch (_) {}
+    return audioCtx;
+  }
+
+  function noiseBuffer(ctx, seconds) {
+    const buf = ctx.createBuffer(1, ctx.sampleRate * seconds, ctx.sampleRate);
+    const d = buf.getChannelData(0);
+    for (let i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1;
+    return buf;
+  }
+
+  function popSound(ctx) {
+    // a quick "pop" for the confetti cannon
+    const t = ctx.currentTime;
+    const src = ctx.createBufferSource();
+    src.buffer = noiseBuffer(ctx, 0.25);
+    const bp = ctx.createBiquadFilter(); bp.type = "bandpass"; bp.frequency.value = 900; bp.Q.value = 0.8;
+    const g = ctx.createGain();
+    g.gain.setValueAtTime(0.9, t);
+    g.gain.exponentialRampToValueAtTime(0.001, t + 0.22);
+    src.connect(bp).connect(g).connect(ctx.destination);
+    src.start(t);
+  }
+
+  function applause(ctx, seconds = 2.8) {
+    // a crowd is many short, filtered noise bursts at random times
+    const start = ctx.currentTime + 0.12;
+    const buf = noiseBuffer(ctx, 0.05);
+    const master = ctx.createGain();
+    master.gain.setValueAtTime(0.0001, start);
+    master.gain.exponentialRampToValueAtTime(0.55, start + 0.3);
+    master.gain.setValueAtTime(0.55, start + seconds - 1.0);
+    master.gain.exponentialRampToValueAtTime(0.0001, start + seconds);
+    master.connect(ctx.destination);
+    const claps = Math.floor(seconds * 70);
+    for (let i = 0; i < claps; i++) {
+      const t = start + Math.random() * seconds;
+      const src = ctx.createBufferSource(); src.buffer = buf;
+      const bp = ctx.createBiquadFilter(); bp.type = "bandpass";
+      bp.frequency.value = 900 + Math.random() * 1800; bp.Q.value = 1.2;
+      const g = ctx.createGain();
+      const peak = 0.25 + Math.random() * 0.5;
+      g.gain.setValueAtTime(peak, t);
+      g.gain.exponentialRampToValueAtTime(0.001, t + 0.03 + Math.random() * 0.03);
+      src.connect(bp).connect(g).connect(master);
+      src.start(t); src.stop(t + 0.07);
+    }
+  }
+
+  function confetti() {
+    const c = document.getElementById("confetti");
+    const ctx = c.getContext("2d");
+    const dpr = window.devicePixelRatio || 1;
+    c.width = innerWidth * dpr; c.height = innerHeight * dpr; ctx.scale(dpr, dpr);
+    const colors = ["#111", "#e63946", "#f4a261", "#2a9d8f", "#457b9d", "#ffbe0b", "#8338ec"];
+    const pieces = [];
+    for (let side of [0, 1]) {
+      for (let i = 0; i < 90; i++) {
+        const angle = (side ? -1 : 1) * (Math.PI / 4 + Math.random() * Math.PI / 6);
+        const speed = 9 + Math.random() * 9;
+        pieces.push({
+          x: side ? innerWidth : 0, y: innerHeight * 0.75,
+          vx: Math.sin(angle) * speed, vy: -Math.cos(Math.abs(angle)) * speed - 4,
+          w: 6 + Math.random() * 6, h: 8 + Math.random() * 8,
+          r: Math.random() * Math.PI, vr: (Math.random() - .5) * .3,
+          color: colors[Math.floor(Math.random() * colors.length)]
+        });
+      }
+    }
+    let frame = 0;
+    (function tick() {
+      ctx.clearRect(0, 0, innerWidth, innerHeight);
+      pieces.forEach(p => {
+        p.vy += 0.28; p.vx *= 0.99; p.x += p.vx; p.y += p.vy; p.r += p.vr;
+        ctx.save(); ctx.translate(p.x, p.y); ctx.rotate(p.r);
+        ctx.fillStyle = p.color; ctx.fillRect(-p.w / 2, -p.h / 2, p.w, p.h * Math.abs(Math.cos(p.r * 2)));
+        ctx.restore();
+      });
+      if (++frame < 260) requestAnimationFrame(tick);
+      else ctx.clearRect(0, 0, innerWidth, innerHeight);
+    })();
+  }
+
+  function celebrate() {
+    const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if (!reduce) confetti();
+    const ctx = getAudio();
+    if (ctx) { popSound(ctx); applause(ctx); }
+  }
+
+  if (location.search.includes("preview")) {
+    document.addEventListener("click", function once() {
+      document.removeEventListener("click", once);
+      document.getElementById("formView").style.display = "none";
+      document.getElementById("doneView").style.display = "block";
+      getAudio() && audioCtx.resume();
+      celebrate();
+    });
+  }
 
   form.addEventListener("submit", async (e) => {
     e.preventDefault();
+    const a = getAudio(); if (a && a.state === "suspended") a.resume();
     err.style.display = "none";
     btn.disabled = true;
     btn.textContent = "Sending…";
@@ -122,6 +320,7 @@
       if (!res.ok) throw new Error("bad response");
       document.getElementById("formView").style.display = "none";
       document.getElementById("doneView").style.display = "block";
+      celebrate();
     } catch (_) {
       err.style.display = "block";
       btn.disabled = false;
@@ -129,5 +328,6 @@
     }
   });
 </script>
+<script type="text/javascript" async src="https://tenor.com/embed.js"></script>
 </body>
 </html>
