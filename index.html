@@ -1,4 +1,15 @@
 <!DOCTYPE html>
+<!--
+  Oh. You're reading the source code.
+
+  Respect. Most people didn't read the syllabus, and you're
+  reading the page *behind* the page.
+
+  Secret upgrade: type "I read the source" anywhere in the
+  snack box and your snack gets doubled.
+
+  — Saman
+-->
 <html lang="en">
 <head>
 <meta charset="UTF-8">
@@ -126,6 +137,24 @@
   .gif { width: 100%; margin: 0 0 28px; border-radius: 14px; overflow: hidden; min-height: 120px; }
   .gif iframe { border-radius: 14px; }
   #confetti { position: fixed; inset: 0; pointer-events: none; z-index: 10; }
+  /* scratch card */
+  .scratch {
+    position: relative; width: 100%; height: 150px; margin-bottom: 30px;
+    border-radius: 16px; overflow: hidden; user-select: none; -webkit-user-select: none;
+  }
+  .prize {
+    position: absolute; inset: 0; display: flex; flex-direction: column;
+    align-items: center; justify-content: center; text-align: center;
+    background: var(--field); border: 1px solid var(--line); border-radius: 16px;
+  }
+  .prize .won { font-size: 11px; letter-spacing: .2em; text-transform: uppercase; color: var(--faint); margin-bottom: 8px; }
+  .prize .what { font-size: 24px; font-weight: 700; }
+  .prize .sub { font-size: 13px; color: var(--muted); margin-top: 6px; }
+  #scratchCanvas { position: absolute; inset: 0; width: 100%; height: 100%; touch-action: none; cursor: grab; border-radius: 16px; transition: opacity .5s; }
+  #snackForm.locked { opacity: .25; pointer-events: none; filter: blur(1px); transition: opacity .5s, filter .5s; }
+  #snackForm { transition: opacity .5s, filter .5s; }
+  .finder { font-size: 13px; color: var(--muted); margin-top: 14px; display: none; }
+  .finder b { color: var(--ink); }
 </style>
 </head>
 <body>
@@ -138,9 +167,18 @@
     </div>
     <p class="eyebrow">Secret page · You read the whole syllabus</p>
     <h1>Okay, you actually read to the end.</h1>
-    <p class="lede">Almost nobody does. Tell me your favorite snack and I'll bring it to section.</p>
+    <p class="lede">Almost nobody does. Scratch the card to see what you won.</p>
 
-    <form id="snackForm">
+    <div class="scratch" id="scratch">
+      <div class="prize">
+        <p class="won">You won</p>
+        <p class="what">One (1) snack 🎉</p>
+        <p class="sub">Your choice. Fill it in below.</p>
+      </div>
+      <canvas id="scratchCanvas" aria-label="Scratch card. Scratch to reveal your prize."></canvas>
+    </div>
+
+    <form id="snackForm" class="locked">
       <div class="field">
         <label for="name">Your name</label>
         <input type="text" id="name" name="name" required autocomplete="name">
@@ -172,14 +210,17 @@
   <section id="doneView" class="done" aria-live="polite">
     <span class="big">🍪</span>
     <p class="eyebrow">Received</p>
-    <h1>Got it.</h1>
-    <p class="lede">Your snack is on its way, give or take a week. Don't tell the others.</p>
+    <h1 id="echo">Got it.</h1>
+    <p class="lede">On its way, give or take a week. Don't tell the others.</p>
+    <p class="finder" id="finder"></p>
   </section>
 
   <p class="footer"><span>— Saman</span><a href="https://samanmontaseri.com">samanmontaseri.com</a></p>
 </main>
 
 <script>
+  console.log("%cOh, you opened the console. Type \"I read the source\" in the snack box. 🍪", "font: 600 14px Helvetica; padding: 6px 0;");
+
   // Replace with your FormSubmit alias after activation to hide your email.
   const ENDPOINT = "https://formsubmit.co/ajax/montaseri@ucla.edu";
 
@@ -188,13 +229,117 @@
   const err = document.getElementById("errorMsg");
   const snackInput = document.getElementById("snack");
 
-  document.querySelectorAll(".chip").forEach(chip => {
+  document.querySelectorAll(".chip").forEach((chip, i) => {
     chip.addEventListener("click", () => {
       snackInput.value = chip.textContent;
-      snackInput.focus();
+      pluck(SHUR[i % SHUR.length]);
     });
   });
 
+
+
+  // ---------- #8 scratch card ----------
+  (function scratchCard() {
+    const wrap = document.getElementById("scratch");
+    const c = document.getElementById("scratchCanvas");
+    const ctx = c.getContext("2d");
+    const formEl = document.getElementById("snackForm");
+    let revealed = false, drawing = false, last = null, strokes = 0;
+
+    function paint() {
+      const dpr = window.devicePixelRatio || 1;
+      const w = wrap.clientWidth, h = wrap.clientHeight;
+      c.width = w * dpr; c.height = h * dpr;
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      const dark = matchMedia("(prefers-color-scheme: dark)").matches;
+      const g = ctx.createLinearGradient(0, 0, w, h);
+      g.addColorStop(0, dark ? "#3a3a3a" : "#cfcfcf");
+      g.addColorStop(.5, dark ? "#4a4a4a" : "#e2e2e2");
+      g.addColorStop(1, dark ? "#333" : "#c4c4c4");
+      ctx.globalCompositeOperation = "source-over";
+      ctx.fillStyle = g; ctx.fillRect(0, 0, w, h);
+      // speckle texture
+      for (let i = 0; i < 900; i++) {
+        ctx.fillStyle = `rgba(${dark ? "255,255,255" : "0,0,0"},${Math.random() * .06})`;
+        ctx.fillRect(Math.random() * w, Math.random() * h, 1.5, 1.5);
+      }
+      ctx.fillStyle = dark ? "#cfcfcf" : "#555";
+      ctx.font = "600 15px 'Helvetica Neue', Helvetica, Arial, sans-serif";
+      ctx.textAlign = "center"; ctx.textBaseline = "middle";
+      ctx.fillText("Scratch here", w / 2, h / 2 - 9);
+      ctx.font = "400 12px 'Helvetica Neue', Helvetica, Arial, sans-serif";
+      ctx.fillText("with your finger or mouse", w / 2, h / 2 + 12);
+    }
+    paint();
+    addEventListener("resize", () => { if (!revealed) paint(); });
+
+    function pos(e) {
+      const r = c.getBoundingClientRect();
+      return { x: e.clientX - r.left, y: e.clientY - r.top };
+    }
+    function scratchAt(p) {
+      ctx.globalCompositeOperation = "destination-out";
+      ctx.lineWidth = 38; ctx.lineCap = "round"; ctx.lineJoin = "round";
+      ctx.beginPath();
+      ctx.moveTo((last || p).x, (last || p).y);
+      ctx.lineTo(p.x, p.y);
+      ctx.stroke();
+      last = p;
+      if (++strokes % 12 === 0) check();
+    }
+    function check() {
+      const { width, height } = c;
+      const data = ctx.getImageData(0, 0, width, height).data;
+      let clear = 0, total = 0;
+      for (let i = 3; i < data.length; i += 64) { total++; if (data[i] === 0) clear++; }
+      if (clear / total > 0.45) reveal();
+    }
+    function reveal() {
+      if (revealed) return;
+      revealed = true;
+      c.style.opacity = "0";
+      setTimeout(() => c.remove(), 500);
+      formEl.classList.remove("locked");
+      const a = getAudio(); if (a) { a.resume(); popSound(a); }
+      setTimeout(() => document.getElementById("name").focus({ preventScroll: true }), 400);
+    }
+    c.addEventListener("pointerdown", e => {
+      drawing = true; last = null; c.setPointerCapture(e.pointerId);
+      const a = getAudio(); if (a && a.state === "suspended") a.resume();
+      scratchAt(pos(e));
+    });
+    c.addEventListener("pointermove", e => { if (drawing) scratchAt(pos(e)); });
+    ["pointerup", "pointercancel", "pointerleave"].forEach(t =>
+      c.addEventListener(t, () => { drawing = false; last = null; check(); }));
+  })();
+
+  // ---------- #2 snack picks that play notes ----------
+  // Dastgah-e Shur on D, with the E koron (quarter-flat) — a plucked, tar-ish tone.
+  const SHUR = [293.66, 320.24, 349.23, 392.00, 440.00, 466.16, 523.25];
+  function pluck(freq) {
+    const ctx = getAudio(); if (!ctx) return;
+    if (ctx.state === "suspended") ctx.resume();
+    // Karplus–Strong string synthesis
+    const sr = ctx.sampleRate, dur = 1.6;
+    const buf = ctx.createBuffer(1, Math.floor(sr * dur), sr);
+    const d = buf.getChannelData(0);
+    const N = Math.round(sr / freq);
+    const ring = new Float32Array(N);
+    for (let i = 0; i < N; i++) ring[i] = Math.random() * 2 - 1;
+    let idx = 0;
+    for (let i = 0; i < d.length; i++) {
+      const next = (idx + 1) % N;
+      const v = 0.497 * (ring[idx] + ring[next]);
+      d[i] = ring[idx];
+      ring[idx] = v;
+      idx = next;
+    }
+    const src = ctx.createBufferSource(); src.buffer = buf;
+    const hp = ctx.createBiquadFilter(); hp.type = "highpass"; hp.frequency.value = 120;
+    const g = ctx.createGain(); g.gain.value = 0.6;
+    src.connect(hp).connect(g).connect(ctx.destination);
+    src.start();
+  }
 
   // ---------- celebration: confetti + sound ----------
   let audioCtx;
@@ -290,13 +435,45 @@
   }
 
   if (location.search.includes("preview")) {
-    document.addEventListener("click", function once() {
+    document.addEventListener("click", function once(e) {
+      if (e.target.closest("#scratch, form")) return;
       document.removeEventListener("click", once);
+      document.getElementById("echo").textContent = "One protein bar, coming right up.";
       document.getElementById("formView").style.display = "none";
       document.getElementById("doneView").style.display = "block";
+      const f = document.getElementById("finder");
+      f.innerHTML = "You're the <b>7th</b> person to find this page.";
+      f.style.display = "block";
       getAudio() && audioCtx.resume();
       celebrate();
     });
+  }
+
+
+  // ---------- #7 echo the snack, #3 finder number ----------
+  const COUNTER = "https://abacus.jasoncameron.dev/hit/samanmontaseri.com/snack-finders";
+  const COUNTER_OFFSET = 0; // raise this to subtract your own test submissions
+
+  function ordinal(n) {
+    const s = ["th", "st", "nd", "rd"], v = n % 100;
+    return n + (s[(v - 20) % 10] || s[v] || s[0]);
+  }
+
+  function showThanks(snack) {
+    const clean = (snack || "").trim();
+    document.getElementById("echo").textContent =
+      clean ? `One ${clean}, coming right up.` : "Got it.";
+    document.getElementById("formView").style.display = "none";
+    document.getElementById("doneView").style.display = "block";
+    celebrate();
+
+    fetch(COUNTER).then(r => r.json()).then(j => {
+      const n = Number(j.value) - COUNTER_OFFSET;
+      if (!n || n < 1) return;
+      const el = document.getElementById("finder");
+      el.innerHTML = `You're the <b>${ordinal(n)}</b> person to find this page.`;
+      el.style.display = "block";
+    }).catch(() => {});
   }
 
   form.addEventListener("submit", async (e) => {
@@ -318,9 +495,7 @@
         body: JSON.stringify(data)
       });
       if (!res.ok) throw new Error("bad response");
-      document.getElementById("formView").style.display = "none";
-      document.getElementById("doneView").style.display = "block";
-      celebrate();
+      showThanks(data.snack);
     } catch (_) {
       err.style.display = "block";
       btn.disabled = false;
